@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phygital Materials Studio - Kingston University London</title>
+    <meta name="description" content="Creating an integrated phygital materials ecosystem that democratises access to sustainable materials and accelerates the transition to a circular economy.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Kingston University Brand Colors */
+            --black: #000000;
+            --white: #FFFFFF;
+            --grey: hsl(0, 0%, 45%);
+            --grey-light: hsl(0, 0%, 95%);
+            --metallic-gold: hsl(43, 60%, 50%);
+            --yellow: #ffb500; /* R 225 G 181 B 0 */
+            --lawn: #F6F1EC; /* R 246 G 241 B 236 */
+            --canvas: #EADFD0; /* R 234 G 223 B 208 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--lawn);
+            overflow-x: hidden;
+        }
+
+        /* Fabric Animation Canvas */
+        #fabric-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-image {
+            height: 80px;
+            width: auto;
+        }
+
+        /* Desktop Navigation */
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .main-nav a {
+            color: var(--black);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--yellow);
+        }
+
+        /* Hamburger Menu Button */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--black);
+            margin: 3px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            transition: left 0.3s ease;
+            padding-top: 100px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-nav.active {
+            left: 0;
+        }
+
+        .mobile-nav ul {
+            list-style: none;
+            padding: 0 30px;
+        }
+
+        .mobile-nav ul li {
+            margin-bottom: 20px;
+        }
+
+        .mobile-nav ul li a {
+            color: var(--black);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            display: block;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--grey-light);
+            transition: color 0.3s ease;
+        }
+
+        .mobile-nav ul li a:hover {
+            color: var(--yellow);
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Section Padding */
+        .section-padding {
+            padding: 80px 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 0 80px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(234, 223, 208, 1.0) 0%, rgba(234, 223, 208, 0.0) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: clamp(1.8rem, 8vw, 5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: var(--grey);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--yellow);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--black);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--black);
+            border: 2px solid var(--black);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--black);
+            color: var(--white);
+        }
+
+        .btn-white {
+            background-color: var(--white);
+            color: var(--black);
+            border: 2px solid var(--white);
+        }
+
+        .btn-white:hover {
+            background-color: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        /* Typography */
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-intro {
+            font-size: 1.125rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--grey);
+        }
+
+        .section-text {
+            font-size: 1.125rem;
+            margin-bottom: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .translucent-block {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .translucent-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Colorful Blocks */
+        .colorful-block {
+            background: linear-gradient(-25deg, rgba(255, 181, 0, 0.45) 15%, rgba(255, 181, 0, 0.95) 65%);
+            padding: 60px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 40px 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .colorful-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-block h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+
+        .cta-block p {
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--white);
+        }
+
+        /* Project Features */
+        .project-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .feature-callout {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .feature-callout h3 {
+            margin-bottom: 15px;
+        }
+
+        .feature-callout-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .feature-callout-icon svg,
+        .feature-callout-icon i svg {
+            width: 30px;
+            height: 30px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .feature-callout-icon.instant,
+        .feature-callout-icon.waste,
+        .feature-callout-icon.access {
+            background-color: rgba(255, 181, 0, 0.85);
+        }
+
+        /* Partner Block */
+        .partner-block {
+            background: linear-gradient(135deg, rgba(255, 181, 0, 0.45) 0%, rgba(255, 181, 0, 0.95) 100%);
+            padding: 60px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 40px 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .partner-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .partner-block h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+
+        .partner-block p {
+            font-size: 1.125rem;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--white);
+        }
+
+        /* Location */
+        .location-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 60px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .location-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .location-image img:hover {
+            box-shadow: none;
+            transform: none;
+        }
+
+        .image-caption {
+            text-align: center;
+            color: var(--grey);
+            margin-bottom: 5px;
+        }
+
+        .image-credit {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--grey);
+        }
+
+        /* Footer */
+        .main-footer {
+            background: transparent;
+            color: var(--canvas);
+        }
+
+        .main-footer .section-title {
+            color: var(--white);
+        }
+
+        .footer-intro {
+            text-align: center;
+            font-size: 1.125rem;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--white);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .contact-block {
+            padding: 40px 30px;
+            text-align: center;
+            background: rgba(255, 181, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 181, 0, 1.0);
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 20px;
+            background: var(--white);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        .contact-icon svg,
+        .contact-icon i svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--black);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .contact-block h3 {
+            margin-bottom: 15px;
+            color: var(--white);
+        }
+
+        .contact-block p {
+            color: var(--white);
+        }
+
+        .contact-block a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-block a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding: 40px 20px;
+            background: #000000;
+        }
+
+        .copyright {
+            margin-bottom: 10px;
+            color: var(--white);
+        }
+
+        .credits {
+            color: rgba(255, 181, 0, 0.95);
+            font-size: 0.875rem;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 15px 0;
+            }
+
+            .logo-image {
+                height: 50px;
+            }
+
+            .main-nav {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero {
+                padding: 120px 0 80px;
+            }
+
+            .hero-title {
+                font-size: clamp(1.8rem, 9vw, 3rem);
+                margin-bottom: 25px;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .location-images {
+                grid-template-columns: 1fr;
+            }
+
+            .section-padding {
+                padding: 60px 0;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+
+            .colorful-block {
+                padding: 40px 20px;
+            }
+
+            .cta-block h2 {
+                font-size: 1.8rem;
+            }
+
+            .cta-block p {
+                font-size: 1rem;
+            }
+
+            .partner-block {
+                padding: 40px 20px;
+            }
+
+            .partner-block h3 {
+                font-size: 1.5rem;
+            }
+
+            .partner-block p {
+                font-size: 1rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .location-image img {
+                height: 250px;
+            }
+        }
+
+        /* Very small mobile devices */
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: clamp(1.5rem, 10vw, 2.2rem);
+                line-height: 1.2;
+                margin-bottom: 20px;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Collaboration Banner */
+        .collaboration-banner {
+            width: 100%;
+            line-height: 0;
+        }
+
+        .collaboration-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Special styling for Pilot Project title */
+        .pilot-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .pilot-subtitle {
+            color: var(--yellow);
+            font-weight: 700;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fabric Animation Canvas -->
+    <canvas id="fabric-canvas" class="fabric-animation"></canvas>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+        <ul>
+            <li><a href="#what-it-is">What It Is</a></li>
+            <li><a href="#three-services">Three Services</a></li>
+            <li><a href="#why-you">Why You</a></li>
+            <li><a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=nALvyc8YFkCG05PPjpT_lEHRZpjKISVCqYQScQLiIO9UODM3RlA3OTRIQjNMMzFaM0ZQMTRDN1NRQi4u" target="_blank" rel="noopener">Take The Survey</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="container">
+                <div class="logo">
+                    <img src="images/Phygital_Materials_Studio_Logo.png" alt="Phygital Materials Studio - Kingston University London" class="logo-image">
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#what-it-is">What It Is</a></li>
+                        <li><a href="#three-services">Three Services</a></li>
+                        <li><a href="#why-you">Why You</a></li>
+                        <li><a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=nALvyc8YFkCG05PPjpT_lEHRZpjKISVCqYQScQLiIO9UODM3RlA3OTRIQjNMMzFaM0ZQMTRDN1NRQi4u" target="_blank" rel="noopener">Take The Survey</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Hamburger Menu Button -->
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero" id="what-it-is">
+            <div class="container">
+                <h1 class="hero-title">We're building<br>something new.<br><span style="color: var(--yellow);">Help us shape it for you</span></h1>
+                <p class="hero-subtitle">The <strong>Phygital Materials Studio</strong> is a proposed future sustainable materials library, digitisation and research lab at Kingston University. We're exploring and gathering feedback from alumni and industry professionals, like yourself, to help shape the vision; scope, access and services.</p>
+                <div class="hero-buttons">
+                    <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=nALvyc8YFkCG05PPjpT_lEHRZpjKISVCqYQScQLiIO9UODM3RlA3OTRIQjNMMzFaM0ZQMTRDN1NRQi4u" target="_blank" rel="noopener" class="btn btn-primary">Take The Survey</a>
+                    <a href="#location" class="btn btn-secondary">Visit the Studio</a>
+            </div>
+        </section>
+
+        <!-- Collaboration Banner -->
+        <div class="collaboration-banner">
+            <img src="images/Phygital Materials Studio - Collaboration.png" alt="Phygital Materials Studio Collaboration">
+        </div>
+
+        <!-- What is Phygital Section -->
+        <section class="section-padding">
+            <div class="container">
+                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; text-align: center;">What is Phygital?</p>
+                <p style="font-size: 1.25rem; max-width: 900px; text-align: center; margin: 0 auto; color: var(--grey);">The word <strong>phygital</strong> describes the overlap between the physical and the digital. In fashion, that translates to workflows where handling a fabric, digitising it for modelling in CG3D&I Digital Product Creation software, and annotating it with data for Digital Product Passport intergration aren't separated steps. They're one continuous act of design.</p>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-block colorful-block">
+                    <h2>Your Materials Prepared for the Future</h2>
+                    <p><strong style="font-size: 1.5rem;">We have made a start.</strong><br><br>The Phygital Materials Studio student-led team and our Creative Practioners translate physical fabric swatches into structured, accurate, data-rich digital files — including DPC platform ready texture maps, with verified physical properties, and all available sustainability and design affordance metadata; ready for integration into PIM and EU Digital Product Passport documentation.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pilot Project Section -->
+        <section class="pilot-project section-padding" id="three-services">
+            <div class="container">
+                <h2 class="pilot-title">Our Questions To You<br><span class="pilot-subtitle">Three Services</span></h2>
+                <p class="section-text" style="color: var(--grey); text-align: center;">Help us understand what the industry actually needs. The survey covers three service areas. You don't need to have views on all of them — skip what isn't relevant to your work — your insight and feedback will help us develop our future plans and funding bids.</p>
+
+                <div class="project-features">
+                    <div class="feature-callout translucent-block" style="background: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.85) 100%);">
+                        <div class="feature-callout-icon instant">
+                            <i data-lucide="copy"></i>
+                        </div>
+                        <h3>Fabric Digitisation — Concierge Service</h3>
+                        <p>A professional scan-to-file service for designers and brands who work with and require verified, accurate digital sampling.</p>
+                    </div>
+                    <div class="feature-callout translucent-block" style="background: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.85) 100%);">
+                        <div class="feature-callout-icon waste">
+                            <i data-lucide="cpu"></i>
+                        </div>
+                        <h3>Studio Access to Kingston School of Art Phygital Workshops</h3>
+                        <p>Access to the Vizoo flatbed scanner, CLO Fabric Kit, and 3D workstations for alumni and industry partners doing their own digital product creation work.</p>
+                    </div>
+                    <div class="feature-callout translucent-block" style="background: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.85) 100%);">
+                        <div class="feature-callout-icon access">
+                            <i data-lucide="book-open"></i>
+                        </div>
+                        <h3>Continuing Professional Development</h3>
+                        <p>Short CPD programmes for alumni and industry professionals. We cover: EU Digital Product Passport compliance, which is mandatory for fashion and textiles product from mid-2027. DPC tool CLO3D, which is already industry-standard at many major brands.</p>
+                    </div>
+                </div>
+
+                <div class="partner-block" id="why-you">
+                    <h3>Kingston University Knowledge Exchange Programmes.</h3>
+                    <p>Kingston School of Art alumni are working across every level of the fashion industry — freelance studios and consultancies, leading Uk and global brands, innovative start-ups and supply chains. That incredible breadth of lived experience is the one thing the University cannot fully generate from within.
+
+The Phygital Materials Studio is being developed for the next generation of fashion designers and product specialists. The students who graduate into your industry will be more useful to you arriving knowing how to work with digital materials, DPC platforms and DPP requirements. That's the practical argument for staying connected and being a part of what's being built here.</p>
+                    <a href="https://www.kingston.ac.uk/research/knowledge-exchange-and-research-institutes/design-arts-and-creative-practice-keri" class="btn btn-white" target="_blank" rel="noopener">Learn More</a>
+                </div>
+            </div>
+        </section>
+
+               <!-- Creative Collaboration Section -->
+        <section class="collaboration section-padding" id="location">
+            <div class="container">
+                <h2 class="section-title">A Space for Creative Collaboration</h2>
+                <p class="section-intro">The Phygital Materials Studio represents the opportunity to build a world-class education facility that enables:<br><strong>"Thinking Through Making Across the Spectrum of Reality"</strong><br>A place for exploring and developing the sustainable materials of tomorrow, readying them for digital integration and discoverability.</p>
+            </div>
+                <div class="location-images">
+                    <div class="location-image">
+                        <img src="images/Phygital_Materilas_Studio_Exterior.png" alt="Phygital Materials Studio — Exterior">
+                        <p class="image-caption">Phygital Materials Studio — Exterior</p>
+                    </div>
+                    <div class="location-image">
+                        <img src="images/Phygital_Materilas_Studio_Interior.png" alt="Phygital Materials Studio — Interior">
+                        <p class="image-caption">Phygital Materials Studio — Interior</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Survey Area Wrapper -->
+        <div style="background: linear-gradient(180deg, rgba(234,223,208,0) 0%, rgba(234,223,208,1) 100%); padding: 0;">
+
+        <!-- Footer -->
+        <footer class="main-footer section-padding" id="contact">
+            <div class="container">
+                <div class="translucent-block" style="padding: 40px; background: rgba(255,255,255,0.95); text-align: center;">
+                    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                        <div class="feature-callout-icon instant">
+                            <i data-lucide="clipboard-list"></i>
+                        </div>
+                    </div>
+                    <h2 class="section-title" style="color: var(--black);"><strong>~6 minutes</strong><br>Your responses shape what gets built</h2>
+                    <p class="footer-intro" style="color: var(--grey);">The survey covers your current workflow, the three service areas above, and whether you'd like to stay involved. All responses are anonymous unless you choose to share contact details.</p>
+                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 16px 24px; text-align: left; max-width: 520px; margin: 0 auto 32px;">
+                        <span style="font-size: 2rem; font-weight: 700; color: var(--black); line-height: 1.3;">6</span>
+                        <p style="color: var(--grey); align-self: center;">sections covering your background, current tools, the three service areas, and whether you'd like to stay involved</p>
+                        <span style="font-size: 2rem; font-weight: 700; color: var(--black); line-height: 1.3;">~6</span>
+                        <p style="color: var(--grey); align-self: center;">minutes to complete — most questions are multiple choice or a rating scale</p>
+                        <span style="font-size: 2rem; font-weight: 700; color: var(--black); line-height: 1.3;">3</span>
+                        <p style="color: var(--grey); align-self: center;">open text questions where your own words matter more than any tick box</p>
+                        <span style="font-size: 2rem; font-weight: 700; color: var(--black); line-height: 1.3;">1</span>
+                        <p style="color: var(--grey); align-self: center;">optional field to share contact details if you'd like to stay involved as services develop</p>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+        <!-- Survey Section -->
+        <section id="survey" class="section-padding">
+            <div class="container">
+                <iframe width="100%" height="600px" src="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=nALvyc8YFkCG05PPjpT_lEHRZpjKISVCqYQScQLiIO9UODM3RlA3OTRIQjNMMzFaM0ZQMTRDN1NRQi4u&embed=true" frameborder="0" marginwidth="0" marginheight="0" style="border: none; max-width:100%; max-height:100vh;" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen></iframe>
+            </div>
+        </section>
+
+        </div><!-- end survey area wrapper -->
+
+        <div class="footer-bottom">
+                    <p class="copyright">This survey is conducted for future services and market development purposes by Kingston University London. Responses are stored within Kingston University's Microsoft 365 environment and are not shared with third parties.
+
+Kingston University London is a higher education corporation. Registered address: Penrhyn Road, Kingston upon Thames, Surrey KT1 2EE.
+
+© 2026 Kingston University London </p>
+                </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Fabric Animation Script
+        (function() {
+            const canvas = document.getElementById('fabric-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            // Cloth geometry
+            const clothGeometry = new THREE.PlaneGeometry(50, 50, 20, 20);
+            const clothMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                side: THREE.DoubleSide,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            const cloth = new THREE.Mesh(clothGeometry, clothMaterial);
+            scene.add(cloth);
+
+            // Cloth physics simulation variables
+            const particles = [];
+            const DAMPING = 0.03;
+            const TIMESTEP = 18 / 1000;
+            const gravity = new THREE.Vector3(0, -981 * 1.4, 0).multiplyScalar(TIMESTEP * TIMESTEP);
+
+            // Initialize particles
+            const vertices = clothGeometry.attributes.position;
+            for (let i = 0; i < vertices.count; i++) {
+                particles.push({
+                    position: new THREE.Vector3(vertices.getX(i), vertices.getY(i), vertices.getZ(i)),
+                    previous: new THREE.Vector3(vertices.getX(i), vertices.getY(i), vertices.getZ(i)),
+                    original: new THREE.Vector3(vertices.getX(i), vertices.getY(i), vertices.getZ(i)),
+                    invMass: 1
+                });
+            }
+
+            // Pin top row
+            for (let i = 0; i < 21; i++) {
+                particles[i].invMass = 0;
+            }
+
+            // Scroll interaction
+            let scrollY = 0;
+            let targetScrollY = 0;
+            window.addEventListener('scroll', () => {
+                targetScrollY = window.pageYOffset;
+            });
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Smooth scroll interpolation
+                scrollY += (targetScrollY - scrollY) * 0.1;
+
+                // Update cloth based on scroll
+                const scrollEffect = scrollY * 0.001;
+                const time = Date.now() * 0.001;
+
+                // Apply wind force based on scroll
+                const windStrength = Math.min(scrollEffect * 2, 10);
+                const windForce = new THREE.Vector3(
+                    Math.sin(time) * windStrength,
+                    Math.cos(time * 0.5) * windStrength * 0.5,
+                    Math.sin(time * 0.7) * windStrength
+                );
+
+                // Update particles
+                for (let i = 0; i < particles.length; i++) {
+                    const particle = particles[i];
+                    if (particle.invMass === 0) continue;
+
+                    const force = gravity.clone();
+                    force.add(windForce.clone().multiplyScalar(particle.invMass));
+
+                    const tmp = particle.position.clone();
+                    particle.position.add(
+                        particle.position.clone().sub(particle.previous).multiplyScalar(1 - DAMPING)
+                    );
+                    particle.position.add(force);
+                    particle.previous = tmp;
+                }
+
+                // Update geometry
+                for (let i = 0; i < particles.length; i++) {
+                    vertices.setXYZ(i, particles[i].position.x, particles[i].position.y, particles[i].position.z);
+                }
+                vertices.needsUpdate = true;
+
+                // Rotate slightly based on scroll
+                cloth.rotation.y = scrollEffect * 0.1;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        // Main Script
+        (function() {
+            // Mobile Menu Functionality
+            const hamburger = document.getElementById('hamburger');
+            const mobileNav = document.getElementById('mobileNav');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+
+            function toggleMobileMenu() {
+                hamburger.classList.toggle('active');
+                mobileNav.classList.toggle('active');
+                mobileOverlay.classList.toggle('active');
+                document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+            }
+
+            function closeMobileMenu() {
+                hamburger.classList.remove('active');
+                mobileNav.classList.remove('active');
+                mobileOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            hamburger.addEventListener('click', toggleMobileMenu);
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+
+            // Close mobile menu when clicking nav links
+            document.querySelectorAll('.mobile-nav a').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            // Smooth scroll for navigation links with header offset
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        const header = document.querySelector('.main-header');
+                        const headerHeight = header.offsetHeight;
+                        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Header scroll effect
+            const header = document.querySelector('.main-header');
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                if (currentScroll > 100) {
+                    header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                } else {
+                    header.style.boxShadow = 'none';
+                }
+            });
+
+            // Intersection Observer for fade-in animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        })();
+    </script>
+</body>
+</html>
